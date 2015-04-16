@@ -17,7 +17,7 @@ opt.on('-p', 'Gistの投稿') {
 
 opt.on('-s ID', '特定のGistを表示') {|id|
   option[:command] = :show
-  option["ID"] = id
+  option["id"] = id
 }
 
 opt.parse!(ARGV)
@@ -28,7 +28,7 @@ when :list
 when :post
   gist.post
 when :show
-  gist.show(option["ID"])
+  gist.show(option)
 else
   opt.help
 end
