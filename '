@@ -16,11 +16,6 @@ opt.on('-p FILE_PATH_LIST', 'Gistの投稿') { |fpl|
   option["file_path_lit"] = fpl.split(',')
 }
 
-opt.on('-d description', '要約') { |fpl|
-  option[:command] = :post
-  option["file_path_lit"] = fpl.split(',')
-}
-
 opt.on('-s ID', '特定のGistを表示') {|id|
   option[:command] = :show
   option["id"] = id

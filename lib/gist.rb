@@ -50,4 +50,25 @@ class Gist
    }
   end
 
+  # 詳細表示
+  def show(option)
+   id = option['id']
+   https = Net::HTTP.new(BASE_DOMAIN, 443)
+   https.use_ssl = true
+   https.start {
+     request = Net::HTTP::Get.new('/gists')
+     request.basic_auth TOKEN, PASSWORD
+     response = https.request(request)
+     gists = JSON.parse(response.body)
+     gists.each do |gist|
+       if gist['id'][0, id.length] == id then
+         gist['files'].each do |name, data|
+           puts "[[#{name}]]"
+           Net::HTTP.get_print URI.parse(data['raw_url'])
+           puts "\n\n"
+         end
+       end
+     end
+   }
+  end
 end
