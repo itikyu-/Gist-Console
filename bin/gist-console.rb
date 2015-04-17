@@ -25,18 +25,21 @@ subcommands = {
     'list' => OptionParser.new do |opts|
        opts.banner = "Usage: list [options]"
        opts.on("-c", "--closed", "限定公開のGistのみを表示") do |v|
-         options[:closed] = v
+         options['closed'] = v
        end
     end,
     'post' => OptionParser.new do |opts|
        opts.banner = "Usage: post [options]"
-       opts.on("-q", "--[no-]quiet", "quietly run ") do |v|
-         options[:quiet] = v
+       opts.on("-c", "--closed", "限定公開として投稿") do |v|
+         options['closed'] = v
+       end
+       opts.on("-d DESCRIPTION", "--description", "概要") do |v|
+         options['desccription'] = v
        end
     end,
     'show' => OptionParser.new do |opts|
        opts.banner = "Usage: show [options]"
-       opts.on("-q command", "--[no-]quiet", "quietly run ") do |v|
+       opts.on("-i ID", "--id", "GistIDの指定") do |v|
          options[:quiet] = v
        end
     end
