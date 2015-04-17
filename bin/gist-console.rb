@@ -34,7 +34,7 @@ subcommands = {
          options['closed'] = v
        end
        opts.on("-d DESCRIPTION", "--description", "概要(必須)") do |v|
-         options['desccription'] = v
+         options['description'] = v
        end
        opts.on("-f FILE_PATH_LIST", "--file-path-list", "投稿ファイルパスの指定(必須)") do |v|
          options['file_path_list'] = v.split(',')
