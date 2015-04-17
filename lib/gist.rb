@@ -15,13 +15,15 @@ class Gist
   end
 
   # 一覧表示
-  def list
+  def list(option)
     @https.start {
       request = Net::HTTP::Get.new('/gists')
       request.basic_auth TOKEN, PASSWORD
       response = https.request(request)
       gists = JSON.parse(response.body)
       gists.each do |gist|
+        next if gist['public'] && option['closed'] == true
+
         body = "GIST_ID: " + gist['id']
         body += "(secret)" unless gist['public']
         body += "\n"
