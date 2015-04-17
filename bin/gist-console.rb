@@ -43,7 +43,7 @@ subcommands = {
     'show' => OptionParser.new do |opts|
        opts.banner = "Usage: show [options]"
        opts.on("-i ID", "--id", "GistIDの指定") do |v|
-         options[:quiet] = v
+         options['id'] = v
        end
     end
 }

@@ -71,7 +71,7 @@ class Gist
       request.basic_auth TOKEN, PASSWORD
       request.body = req_body.to_json
       response = @https.request(request)
-      puts response.body
     }
+    puts "posted successfully"
   end
 end
