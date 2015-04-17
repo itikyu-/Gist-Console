@@ -19,7 +19,7 @@ class Gist
     @https.start {
       request = Net::HTTP::Get.new('/gists')
       request.basic_auth TOKEN, PASSWORD
-      response = https.request(request)
+      response = @https.request(request)
       gists = JSON.parse(response.body)
       gists.each do |gist|
         next if gist['public'] && option['closed'] == true
@@ -42,7 +42,7 @@ class Gist
     @https.start {
       request = Net::HTTP::Get.new('/gists')
       request.basic_auth TOKEN, PASSWORD
-      response = https.request(request)
+      response = @https.request(request)
       gists = JSON.parse(response.body)
       gists.each do |gist|
         if gist['id'][0, id.length] == id then
@@ -70,7 +70,7 @@ class Gist
       request = Net::HTTP::Post.new('/gists')
       request.basic_auth TOKEN, PASSWORD
       request.body = req_body.to_json
-      response = https.request(request)
+      response = @https.request(request)
       puts response.body
     }
   end
