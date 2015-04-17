@@ -19,11 +19,14 @@ class Gist
       response = https.request(request)
       gists = JSON.parse(response.body)
       gists.each do |gist|
-        puts "GIST_ID: #{gist['id']}"
+        body = "GIST_ID: " + gist['id']
+        body += "(secret)" unless gist['public']
+        body += "\n"
         gist['files'].each do |name, data|
-          print "#{name}[#{data['language']}]  "
+          body += "#{name}[#{data['language']}]  "
         end
-        puts "\n    Description: #{gist['description']}\n\n"
+        body += "\n    Description: #{gist['description']}\n\n"
+        puts body
       end
     }
   end
