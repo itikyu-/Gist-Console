@@ -9,11 +9,14 @@ PASSWORD = 'x-oauth-basic'
 
 class Gist
 
+  def initialize 
+    @https = Net::HTTP.new(BASE_DOMAIN, 443)
+    @https.use_ssl = true
+  end
+
   # 一覧表示
   def list
-    https = Net::HTTP.new(BASE_DOMAIN, 443)
-    https.use_ssl = true
-    https.start {
+    @https.start {
       request = Net::HTTP::Get.new('/gists')
       request.basic_auth TOKEN, PASSWORD
       response = https.request(request)
@@ -34,9 +37,7 @@ class Gist
   # 詳細表示
   def show(option)
     id = option['id']
-    https = Net::HTTP.new(BASE_DOMAIN, 443)
-    https.use_ssl = true
-    https.start {
+    @https.start {
       request = Net::HTTP::Get.new('/gists')
       request.basic_auth TOKEN, PASSWORD
       response = https.request(request)
@@ -63,9 +64,7 @@ class Gist
       req_body['files'][File.basename(file_path)] = {content: File.open(file_path).read}
     end
 
-    https = Net::HTTP.new(BASE_DOMAIN, 443)
-    https.use_ssl = true
-    https.start {
+    @https.start {
       request = Net::HTTP::Post.new('/gists')
       request.basic_auth TOKEN, PASSWORD
       request.body = req_body.to_json
