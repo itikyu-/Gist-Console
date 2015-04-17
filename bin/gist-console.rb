@@ -4,40 +4,59 @@ require "optparse"
 require_relative "../lib/gist"
 
 gist = Gist.new
-opt = OptionParser.new  
-option = {}
+options = {}
 
-opt.on('-l', 'Gistを一覧で表示') {
-  option[:command] = :list
+subtext = <<HELP
+サブコマンド一覧:
+list :     一覧表示
+post :     投稿
+show :     詳細表示
+
+それぞれのコマンドの詳細は 'gist-console.rb COMMAND --help'.
+HELP
+
+global = OptionParser.new do |opts|
+  opts.banner = "Usage: gist-console.rb subcommand [options]"
+  opts.separator ""
+  opts.separator subtext
+end
+
+subcommands = { 
+    'list' => OptionParser.new do |opts|
+       opts.banner = "Usage: list [options]"
+       opts.on("-c", "--closed", "限定公開のGistのみを表示") do |v|
+         options[:closed] = v
+       end
+    end,
+    'post' => OptionParser.new do |opts|
+       opts.banner = "Usage: post [options]"
+       opts.on("-q", "--[no-]quiet", "quietly run ") do |v|
+         options[:quiet] = v
+       end
+    end,
+    'show' => OptionParser.new do |opts|
+       opts.banner = "Usage: show [options]"
+       opts.on("-q command", "--[no-]quiet", "quietly run ") do |v|
+         options[:quiet] = v
+       end
+    end
 }
+subcommands.default = OptionParser.new do |opts|
+       opts.banner = "NOT SUBCOMMAND"
+end
 
-opt.on('-p FILE_PATH_LIST', 'Gistの投稿') { |fpl|
-  option[:command] = :post
-  option["file_path_list"] = fpl.split(',')
-}
 
-opt.on('-d description', '要約') { |desc|
-  option["description"] = desc
-}
+global.order!
+command = ARGV.shift
+subcommands[command].order!
 
-opt.on('-c', 'CLOSED: 非公開Gistとする') { 
-  option["closed"] = true
-}
-
-opt.on('-s ID', '特定のGistを表示') {|id|
-  option[:command] = :show
-  option["id"] = id
-}
-
-opt.parse!(ARGV)
-
-case option[:command] 
-when :list
-  gist.list
-when :post
-  gist.post(option)
-when :show
-  gist.show(option)
+case command
+when 'list'
+  gist.list(options)
+when 'post'
+  gist.post(options)
+when 'show'
+  gist.show(options)
 else
-  opt.help
+  global.help
 end
