@@ -12,9 +12,28 @@ class Gist
   # 一覧表示
   def list(option)
     gists = @api.request_get('/gists')
-    gists.each do |gist|
-      next if gist['public'] && option['closed'] == true
+ 
+    gists.select! do  |gist|
+      next if  option['closed'] == true && gist['public'] 
+      
+      unless option['description'] == nil then
+        next unless option['description'].all? do |word|
+          gist['description'].include? word
+        end
+      end
 
+      unless option['language'] == nil then
+        langs = gist['files'].map do |name, data| 
+          data['language']
+        end.compact.uniq.map(&:upcase)
+        option['language'].map!(&:upcase)
+        next unless (langs & option['language']).length >= 1
+      end
+
+      true
+    end 
+
+    gists.each do |gist|
       body = "GIST_ID: " + gist['id']
       body += "(secret)" unless gist['public']
       body += "\n"
