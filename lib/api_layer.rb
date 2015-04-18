@@ -21,7 +21,7 @@ class Api_layer
     JSON.parse(@response.body)
   end
 
-  def request_post(path, param)
+  def post_gist(path, param)
     request = Net::HTTP::Post.new(path)
     request.basic_auth TOKEN, PASSWORD
     request.body = param.to_json
@@ -29,7 +29,44 @@ class Api_layer
     JSON.parse(@response.body)
   end
 
+
   def success?
     @response.is_a? Net::HTTPSuccess
+  end
+
+  def header_value(key)
+    @response.get_fields(key)
+  end 
+
+  def get_all_gist(path, param = nil)
+    request = Net::HTTP::Get.new(path)
+    request.basic_auth TOKEN, PASSWORD
+    @response = @https.request(request)
+    result = Array.new(1, JSON.parse(@response.body))
+    return result[0] if @response.get_fields('link').nil? 
+
+    page_range = @response.get_fields('link')[0].scan(/page=(.*?)>/).flatten.map(&:to_i)
+    (page_range[0]..page_range[1]).each do |p|
+      request = Net::HTTP::Get.new(path + "?page=" + p.to_s)
+      @response = @https.request(request)
+      result << JSON.parse(@response.body)
+    end
+
+    result.inject(:+)
+  end
+
+  private
+
+  def anonymous_request_get(path, param = nil)
+    request = Net::HTTP::Get.new(path)
+    @response = @https.request(request)
+    JSON.parse(@response.body)
+  end
+
+  def anonymous_request_post(path, param)
+    request = Net::HTTP::Post.new(path)
+    request.body = param.to_json
+    @response = @https.request(request)
+    JSON.parse(@response.body)
   end
 end

@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# RubyのOptionParserを利用してコマンドラインインターフェイスの定義を行う
 
 require "optparse"
 require_relative "../lib/gist"
@@ -21,6 +22,7 @@ global = OptionParser.new do |opts|
   opts.separator subtext
 end
 
+# サブコマンドの定義
 subcommands = { 
     'list' => OptionParser.new do |opts|
        opts.banner = "Usage: list [options]"
@@ -42,6 +44,7 @@ subcommands = {
          options['description'] = args
        end
     end,
+
     'post' => OptionParser.new do |opts|
        opts.banner = "Usage: post [options]"
        opts.on("-c", "--closed", "限定公開として投稿") do |v|
@@ -58,6 +61,7 @@ subcommands = {
          options['file_path_list'] = args
        end
     end,
+
     'show' => OptionParser.new do |opts|
        opts.banner = "Usage: show [options]"
        opts.on("-i ID", "--id", "GistIDの指定") do |v|
@@ -75,13 +79,15 @@ subcommands = {
     end
 }
 subcommands.default = OptionParser.new do |opts|
-       opts.banner = "NOT SUBCOMMAND"
+  opts.banner = "NOT SUBCOMMAND"
 end
 
+# Optionの解析
 global.order!
 command = ARGV.shift
 subcommands[command].order!
 
+# 実処理の開始
 case command
 when 'list'
   gist.list(options)
@@ -89,6 +95,4 @@ when 'post'
   gist.post(options)
 when 'show'
   gist.show(options)
-else
-  global.help
 end

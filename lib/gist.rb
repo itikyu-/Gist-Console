@@ -11,7 +11,7 @@ class Gist
 
   # 一覧表示
   def list(option)
-    gists = @api.request_get('/gists')
+    gists = @api.get_all_gist('/gists')
  
     gists.select! do  |gist|
       next if  option['closed'] == true && gist['public'] 
@@ -34,6 +34,7 @@ class Gist
     end 
 
     print_outline gists
+    puts @api.header_value('link')
   end
 
   # 詳細表示
@@ -95,9 +96,10 @@ class Gist
       req_body['files'][File.basename(file_path)] = {content: File.open(file_path).read}
     end
 
-    msg = @api.request_post('/gists', req_body)
+    msg = @api.post_gist('/gists', req_body)
     if @api.success? then
       puts "Posted Successfully!"
+      puts msg['html_url']
     else
       puts msg
     end
