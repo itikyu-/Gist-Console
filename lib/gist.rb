@@ -34,7 +34,6 @@ class Gist
     end 
 
     print_outline gists
-    puts @api.header_value('link')
   end
 
   # 詳細表示
@@ -108,7 +107,7 @@ class Gist
   private
   def print_outline(gists)
     gists.each do |gist|
-      body = "GIST_ID: " + gist['id']
+      body = "GIST_ID: \e[31m" + gist['id'] + "\e[0m"
       body += "(secret)" unless gist['public']
       body += "\n"
       gist['files'].each do |name, data|

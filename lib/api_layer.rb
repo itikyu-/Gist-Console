@@ -48,6 +48,7 @@ class Api_layer
     page_range = @response.get_fields('link')[0].scan(/page=(.*?)>/).flatten.map(&:to_i)
     (page_range[0]..page_range[1]).each do |p|
       request = Net::HTTP::Get.new(path + "?page=" + p.to_s)
+      request.basic_auth TOKEN, PASSWORD
       @response = @https.request(request)
       result << JSON.parse(@response.body)
     end
