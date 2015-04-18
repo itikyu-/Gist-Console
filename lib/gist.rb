@@ -41,24 +41,11 @@ class Gist
     id = option['id']
     if id.length < 20 then
       gists = @api.get_all_gist
+      gist = search_id(gists, id)
     else
-      gists = [@api.get_the_gist(id)]
+      gist = @api.get_the_gist(id)
     end
 
-    gists.select! do |gist|
-      gist['id'][0, id.length] == id
-    end
-
-    if gists.length == 0
-      puts "見つかりませんでした。"
-      exit
-    elsif gists.length > 1
-      print_outline gists
-      puts "複数ヒットしました。IDを一意に定まる長さまで指定して下さい。"
-      exit
-    end
-
-    gist = gists[0]
     if option['file'] == true
       gist['files'].each do |name, data|
         File.open(name, "w") do |f|
@@ -79,11 +66,11 @@ class Gist
         end
       end
     elsif option['script'] == true
-      puts "<script src=\"https://gist.github.com/#{gist['owner']['login']}/#{gist['id']}.js\"></script>"
+      puts "<script src=\"#{gist['html_url']}.js\"></script>"
     else
       gist['files'].each do |name, data|
         puts "[[#{name}]]"
-        Net::HTTP.get_print URI.parse(data['raw_url'])
+        puts @api.get_raw(data['raw_url'])
         puts "\n\n"
       end
     end 
@@ -99,13 +86,7 @@ class Gist
       req_body['files'][File.basename(file_path)] = {content: File.open(file_path).read}
     end
 
-    msg = @api.post_gist('/gists', req_body)
-    if @api.success? then
-      puts "Posted Successfully!"
-      puts msg['html_url']
-    else
-      puts msg
-    end
+    puts @api.post_gist('/gists', req_body)
   end
 
   private
@@ -120,5 +101,20 @@ class Gist
       body += "\n    Description: #{gist['description']}\n\n"
       puts body
     end
+  end
+
+  def search_id(gists, id)
+    gists.select! do |gist|
+      gist['id'][0, id.length] == id
+    end
+    if gists.length == 0
+      puts "見つかりませんでした。"
+      exit
+    elsif gists.length > 1
+      print_outline gists
+      puts "複数ヒットしました。IDを一意に定まる長さまで指定して下さい。"
+      exit
+    end
+    gists[0]
   end
 end

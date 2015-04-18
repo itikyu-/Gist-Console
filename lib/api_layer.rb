@@ -18,6 +18,11 @@ class Api_layer
     request = Net::HTTP::Get.new('/gists/' + id)
     request.basic_auth TOKEN, PASSWORD
     @response = @https.request(request)
+
+    unless success?
+      puts "見つかりませんでした。"
+      exit
+    end
     JSON.parse(@response.body)
   end
 
@@ -44,13 +49,29 @@ class Api_layer
     request.basic_auth TOKEN, PASSWORD
     request.body = param.to_json
     @response = @https.request(request)
-    JSON.parse(@response.body)
+
+    if success?
+      gist = JSON.parse(@response.body)
+      str = <<-"EOS"
+        Posted Successfully!
+        URL:
+        #{gist['html_url']}
+        Embeded:
+        <script src=\"#{gist['html_url']}.js\"></script>
+      EOS
+    else 
+      str = <<-"EOS"
+        Failed!
+        #{JSON.parse(@response.body)}
+      EOS
+    end
+    return str
   end
 
-
-  def success?
-    @response.is_a? Net::HTTPSuccess
+  def get_raw(url)
+    Net::HTTP.get URI.parse(url)
   end
+
 
   def header_value(key)
     @response.get_fields(key)
@@ -58,6 +79,10 @@ class Api_layer
 
 
   private
+
+  def success?
+    @response.is_a? Net::HTTPSuccess
+  end
 
   def anonymous_request_get(path, param = nil)
     request = Net::HTTP::Get.new(path)
