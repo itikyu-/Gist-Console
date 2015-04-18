@@ -1,8 +1,11 @@
 #!/usr/bin/env ruby
+
 require_relative "api_layer"
 require "uri"
 require "net/https"
 
+# APIへ渡すパラメータの整形
+# APIから返ってきたデータの整形・出力を行います
 class Gist
 
   def initialize 
@@ -47,17 +50,11 @@ class Gist
     end
 
     if option['file'] == true
-      gist['files'].each do |name, data|
-        File.open(name, "w") do |f|
-          f.puts Net::HTTP.get(URI.parse(data['raw_url']))
-        end
-      end
+      write_files('./', gist)
     elsif option['exec'] == true
+      write_files('/tmp/', gist)
       commands = []
       gist['files'].each do |name, data|
-        File.open("/tmp/"+name, "w") do |f|
-          f.puts Net::HTTP.get(URI.parse(data['raw_url']))
-        end
         lang = data['language'] == nil ? 'text' : data['language'].downcase
         commands << "#{lang} /tmp/#{name}" if lang != 'text'
         commands.each do |com|
@@ -116,5 +113,13 @@ class Gist
       exit
     end
     gists[0]
+  end
+
+  def write_files(base_path, gist)
+      gist['files'].each do |name, data|
+        File.open(name, "w") do |f|
+          f.puts @api.get_raw(data['raw_url'])
+        end
+      end
   end
 end

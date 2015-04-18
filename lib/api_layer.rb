@@ -7,6 +7,8 @@ BASE_DOMAIN = "api.github.com"
 TOKEN = File.open("#{ENV['HOME']}/.config/github_personal_token").read.chomp
 PASSWORD = 'x-oauth-basic'
 
+# GitHubのAPIと直接のやり取りを行う
+# HTTP関連の処理はこちらに集約してGistクラスからはHTTPを隠蔽
 class Api_layer
 
   def initialize
