@@ -11,7 +11,7 @@ class Gist
 
   # 一覧表示
   def list(option)
-    gists = @api.get_all_gist('/gists')
+    gists = @api.get_all_gist
  
     gists.select! do  |gist|
       next if  option['closed'] == true && gist['public'] 
@@ -39,7 +39,11 @@ class Gist
   # 詳細表示
   def show(option)
     id = option['id']
-    gists = @api.request_get('/gists')
+    if id.length < 20 then
+      gists = @api.get_all_gist
+    else
+      gists = [@api.get_the_gist(id)]
+    end
 
     gists.select! do |gist|
       gist['id'][0, id.length] == id

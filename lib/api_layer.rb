@@ -14,11 +14,29 @@ class Api_layer
     @https.use_ssl = true
   end
 
-  def request_get(path, param = nil)
-    request = Net::HTTP::Get.new(path)
+  def get_the_gist(id)
+    request = Net::HTTP::Get.new('/gists/' + id)
     request.basic_auth TOKEN, PASSWORD
     @response = @https.request(request)
     JSON.parse(@response.body)
+  end
+
+  def get_all_gist
+    request = Net::HTTP::Get.new('/gists')
+    request.basic_auth TOKEN, PASSWORD
+    @response = @https.request(request)
+    result = Array.new(1, JSON.parse(@response.body))
+    return result[0] if @response.get_fields('link').nil? 
+
+    page_range = @response.get_fields('link')[0].scan(/page=(.*?)>/).flatten.map(&:to_i)
+    (page_range[0]..page_range[1]).each do |p|
+      request = Net::HTTP::Get.new("/gists?page=" + p.to_s)
+      request.basic_auth TOKEN, PASSWORD
+      @response = @https.request(request)
+      result << JSON.parse(@response.body)
+    end
+
+    result.inject(:+)
   end
 
   def post_gist(path, param)
@@ -38,23 +56,6 @@ class Api_layer
     @response.get_fields(key)
   end 
 
-  def get_all_gist(path, param = nil)
-    request = Net::HTTP::Get.new(path)
-    request.basic_auth TOKEN, PASSWORD
-    @response = @https.request(request)
-    result = Array.new(1, JSON.parse(@response.body))
-    return result[0] if @response.get_fields('link').nil? 
-
-    page_range = @response.get_fields('link')[0].scan(/page=(.*?)>/).flatten.map(&:to_i)
-    (page_range[0]..page_range[1]).each do |p|
-      request = Net::HTTP::Get.new(path + "?page=" + p.to_s)
-      request.basic_auth TOKEN, PASSWORD
-      @response = @https.request(request)
-      result << JSON.parse(@response.body)
-    end
-
-    result.inject(:+)
-  end
 
   private
 
