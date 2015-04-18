@@ -33,31 +33,56 @@ class Gist
       true
     end 
 
-    gists.each do |gist|
-      body = "GIST_ID: " + gist['id']
-      body += "(secret)" unless gist['public']
-      body += "\n"
-      gist['files'].each do |name, data|
-        body += "#{name}[#{data['language']}]  "
-      end
-      body += "\n    Description: #{gist['description']}\n\n"
-      puts body
-    end
+    print_outline gists
   end
 
   # 詳細表示
   def show(option)
     id = option['id']
     gists = @api.request_get('/gists')
-    gists.each do |gist|
-      if gist['id'][0, id.length] == id then
-        gist['files'].each do |name, data|
-          puts "[[#{name}]]"
-          Net::HTTP.get_print URI.parse(data['raw_url'])
-          puts "\n\n"
+
+    gists.select! do |gist|
+      gist['id'][0, id.length] == id
+    end
+
+    if gists.length == 0
+      puts "見つかりませんでした。"
+      exit
+    elsif gists.length > 1
+      print_outline gists
+      puts "複数ヒットしました。IDを一意に定まる長さまで指定して下さい。"
+      exit
+    end
+
+    gist = gists[0]
+    if option['file'] == true
+      gist['files'].each do |name, data|
+        File.open(name, "w") do |f|
+          f.puts Net::HTTP.get(URI.parse(data['raw_url']))
         end
       end
-    end
+    elsif option['exec'] == true
+      commands = []
+      gist['files'].each do |name, data|
+        File.open("/tmp/"+name, "w") do |f|
+          f.puts Net::HTTP.get(URI.parse(data['raw_url']))
+        end
+        lang = data['language'] == nil ? 'text' : data['language'].downcase
+        commands << "#{lang} /tmp/#{name}" if lang != 'text'
+        commands.each do |com|
+          puts "EXEC: #{com}"
+          puts `#{com}`
+        end
+      end
+    elsif option['script'] == true
+      puts "<script src=\"https://gist.github.com/#{gist['owner']['login']}/#{gist['id']}.js\"></script>"
+    else
+      gist['files'].each do |name, data|
+        puts "[[#{name}]]"
+        Net::HTTP.get_print URI.parse(data['raw_url'])
+        puts "\n\n"
+      end
+    end 
   end
 
   # 新規Gistの作成
@@ -75,6 +100,20 @@ class Gist
       puts "Posted Successfully!"
     else
       puts msg
+    end
+  end
+
+  private
+  def print_outline(gists)
+    gists.each do |gist|
+      body = "GIST_ID: " + gist['id']
+      body += "(secret)" unless gist['public']
+      body += "\n"
+      gist['files'].each do |name, data|
+        body += "#{name}[#{data['language']}]  "
+      end
+      body += "\n    Description: #{gist['description']}\n\n"
+      puts body
     end
   end
 end
