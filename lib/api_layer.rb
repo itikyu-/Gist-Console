@@ -16,6 +16,7 @@ class Api_layer
     @https.use_ssl = true
   end
 
+  # IDを完全指定してGistを取得
   def get_the_gist(id)
     request = Net::HTTP::Get.new('/gists/' + id)
     request.basic_auth TOKEN, PASSWORD
@@ -28,6 +29,9 @@ class Api_layer
     JSON.parse(@response.body)
   end
 
+  # 全Gist一覧を取得
+  # 1度に30件までのGistの取得になるため、30件以上存在している場合は
+  # ResponseHeaderのlinkフィールドを確認して続きを取得する
   def get_all_gist
     request = Net::HTTP::Get.new('/gists')
     request.basic_auth TOKEN, PASSWORD
@@ -46,6 +50,8 @@ class Api_layer
     result.inject(:+)
   end
 
+  # Gistを投稿する。
+  # 成功時にはGitHub上の該当URLと埋め込み用のScriptタグを返す
   def post_gist(path, param)
     request = Net::HTTP::Post.new(path)
     request.basic_auth TOKEN, PASSWORD
@@ -70,11 +76,12 @@ class Api_layer
     return str
   end
 
+  # 認証不要な任意のURLを叩いて結果を返す
   def get_raw(url)
     Net::HTTP.get URI.parse(url)
   end
 
-
+  # ヘッダーから値を取得
   def header_value(key)
     @response.get_fields(key)
   end 
@@ -82,16 +89,19 @@ class Api_layer
 
   private
 
+  # APIのリターンコードが200系であることを確認
   def success?
     @response.is_a? Net::HTTPSuccess
   end
 
+  # 非認証APIを叩く用(GET)
   def anonymous_request_get(path, param = nil)
     request = Net::HTTP::Get.new(path)
     @response = @https.request(request)
     JSON.parse(@response.body)
   end
 
+  # 非認証APIを叩く用(POST)
   def anonymous_request_post(path, param)
     request = Net::HTTP::Post.new(path)
     request.body = param.to_json

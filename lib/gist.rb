@@ -13,6 +13,7 @@ class Gist
   end
 
   # 一覧表示
+  # SUBCOMMAND: list
   def list(option)
     gists = @api.get_all_gist
  
@@ -40,6 +41,7 @@ class Gist
   end
 
   # 詳細表示
+  # SUBCOMMAND: show
   def show(option)
     id = option['id']
     if id.length < 20 then
@@ -74,6 +76,7 @@ class Gist
   end
 
   # 新規Gistの作成
+  # SUBCOMMAND: post
   def post(option)
     req_body = {}
     req_body['description'] = option['description']
@@ -87,6 +90,8 @@ class Gist
   end
 
   private
+
+  # gistアウトラインの表示
   def print_outline(gists)
     gists.each do |gist|
       body = "GIST_ID: \e[31m" + gist['id'] + "\e[0m"
@@ -100,6 +105,7 @@ class Gist
     end
   end
 
+  # gist一覧から特定のGistIDで検索
   def search_id(gists, id)
     gists.select! do |gist|
       gist['id'][0, id.length] == id
@@ -115,6 +121,7 @@ class Gist
     gists[0]
   end
 
+  # ローカルファイルへGistの保存 
   def write_files(base_path, gist)
       gist['files'].each do |name, data|
         File.open(name, "w") do |f|
