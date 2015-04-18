@@ -71,3 +71,5 @@ tramp
 
 # cask packages
 .cask/
+
+*.swp
