@@ -71,6 +71,14 @@ Descriptionと公開・非公開をオプションにて指定
 $ gist-console post -f main.rb input.txt -c -d "FileIOのサンプル"
 ```
 
+### 削除
+
+Gistからの削除<br>
+-iオプションでIDを指定してGistを削除
+```
+$ gist-console delete -i hogehoge
+```
+
 ## ヘルプ
 
 ヘルプの表示

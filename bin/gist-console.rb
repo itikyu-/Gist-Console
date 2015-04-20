@@ -76,6 +76,13 @@ subcommands = {
        opts.on("-s", "--script", "HTMLにGistを埋め込む用のタグを表示") do |v|
          options['script'] = v
        end
+    end,
+
+    'delete' => OptionParser.new do |opts|
+       opts.banner = "Usage: delete [options]"
+       opts.on("-i ID", "--id", "GistIDの指定") do |v|
+         options['id'] = v
+       end
     end
 }
 subcommands.default = OptionParser.new do |opts|
@@ -95,4 +102,6 @@ when 'post'
   gist.post(options)
 when 'show'
   gist.show(options)
+when 'delete'
+  gist.delete(options)
 end

@@ -29,6 +29,13 @@ class Api_layer
     JSON.parse(@response.body)
   end
 
+  # IDを完全指定してGistを削除
+  def delete_the_gist(id)
+    request = Net::HTTP::Delete.new('/gists/' + id)
+    request.basic_auth TOKEN, PASSWORD
+    @response = @https.request(request)
+  end
+
   # 全Gist一覧を取得
   # 1度に30件までのGistの取得になるため、30件以上存在している場合は
   # ResponseHeaderのlinkフィールドを確認して続きを取得する
@@ -86,13 +93,12 @@ class Api_layer
     @response.get_fields(key)
   end 
 
-
-  private
-
   # APIのリターンコードが200系であることを確認
   def success?
     @response.is_a? Net::HTTPSuccess
   end
+
+  private
 
   # 非認証APIを叩く用(GET)
   def anonymous_request_get(path, param = nil)

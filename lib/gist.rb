@@ -8,7 +8,7 @@ require "net/https"
 # APIから返ってきたデータの整形・出力を行います
 class Gist
 
-  def initialize 
+  def initialize
     @api = Api_layer.new
   end
 
@@ -16,10 +16,10 @@ class Gist
   # SUBCOMMAND: list
   def list(option)
     gists = @api.get_all_gist
- 
+
     gists.select! do  |gist|
-      next if  option['closed'] == true && gist['public'] 
-      
+      next if  option['closed'] == true && gist['public']
+
       unless option['description'] == nil then
         next unless option['description'].all? do |word|
           gist['description'].include? word
@@ -27,7 +27,7 @@ class Gist
       end
 
       unless option['language'] == nil then
-        langs = gist['files'].map do |name, data| 
+        langs = gist['files'].map do |name, data|
           data['language']
         end.compact.uniq.map(&:upcase)
         option['language'].map!(&:upcase)
@@ -35,7 +35,7 @@ class Gist
       end
 
       true
-    end 
+    end
 
     print_outline gists
   end
@@ -48,7 +48,7 @@ class Gist
       gists = @api.get_all_gist
       gist = search_id(gists, id)
     else
-      gist = @api.get_the_gist(id)
+      gist = search_with_complete_id(id)
     end
 
     if option['file'] == true
@@ -72,7 +72,7 @@ class Gist
         puts @api.get_raw(data['raw_url'])
         puts "\n\n"
       end
-    end 
+    end
   end
 
   # 新規Gistの作成
@@ -89,6 +89,27 @@ class Gist
     puts @api.post_gist('/gists', req_body)
   end
 
+  # Gistの削除
+  # SUBCOMMAND: delete
+  def delete(option)
+    id = option['id']
+    if id.length < 20 then
+      gists = @api.get_all_gist
+      gist = search_id(gists, id)
+      confirm!(gist['id'], gist)
+      response = @api.delete_the_gist(gist['id'])
+    else
+      confirm!(id)
+      response = @api.delete_the_gist(id)
+    end
+
+    if @api.success? then
+      puts "削除成功しました!"
+    else
+      puts "削除失敗しました...", response.body
+    end
+  end
+  
   private
 
   # gistアウトラインの表示
@@ -121,7 +142,19 @@ class Gist
     gists[0]
   end
 
-  # ローカルファイルへGistの保存 
+  # 完全なGistIDで検索
+  def search_with_complete_id(id)
+    gist = @api.get_the_gist(id)
+
+    if @api.success? then
+      return gist
+    else 
+      puts "見つかりませんでした。"
+      exit
+    end
+  end
+
+  # ローカルファイルへGistの保存
   def write_files(base_path, gist)
       gist['files'].each do |name, data|
         File.open(name, "w") do |f|
@@ -129,4 +162,21 @@ class Gist
         end
       end
   end
+
+  # 対象にしているGistが間違っていないか、確認をする。
+  # 間違っていた場合は処理を強制終了する。
+  def confirm!(id, gist = nil)
+    gist = search_with_complete_id(id) if gist == nil
+
+    print_outline([gist])
+    print "対象は間違いありませんか? [Y/n]:"
+
+    if gets.chomp.casecmp("y") == 0 then
+      return true
+    else
+      puts "終了します。"
+      exit
+    end
+  end
+
 end
