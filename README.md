@@ -53,6 +53,11 @@ $ gist-console show -i 12
 $ gist-console show -i 12 -f
 ```
 
+ローカルにgistをcloneする
+```
+$ gist-console show -i 12 -c
+```
+
 HTMLに埋め込むようのスクリプトを表示
 ```
 $ gist-console show -i 12 -s

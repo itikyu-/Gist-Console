@@ -66,6 +66,9 @@ class Gist
       end
     elsif option['script'] == true
       puts "<script src=\"#{gist['html_url']}.js\"></script>"
+    elsif option.has_key? 'clone'
+      option['clone'] == "" if option['clone'] == nil
+      system "git clone #{gist['git_pull_url']} #{option['clone']}"
     else
       gist['files'].each do |name, data|
         puts "[[#{name}]]"

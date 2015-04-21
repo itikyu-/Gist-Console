@@ -53,7 +53,7 @@ subcommands = {
        opts.on("-d DESCRIPTION", "--description", "概要(必須)") do |v|
          options['description'] = v
        end
-       opts.on("-f FILE_PATH_LIST", "--file-path-list", "投稿ファイルパスの指定(必須)") do |v|
+       opts.on("-f FILE_PATH_LIST", "--file-path-list", "投稿するファイルを指定(必須)") do |v|
          args = [v]
          while ARGV[0] != nil && ARGV[0][0] != '-' do
            args << ARGV.shift
@@ -75,6 +75,9 @@ subcommands = {
        end
        opts.on("-s", "--script", "HTMLにGistを埋め込む用のタグを表示") do |v|
          options['script'] = v
+       end
+       opts.on("-c [NAME]", "--clone", "Gistをローカルへcloneします。") do |v|
+         options['clone'] = v
        end
     end,
 
