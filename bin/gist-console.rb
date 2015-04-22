@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 # RubyのOptionParserを利用してコマンドラインインターフェイスの定義を行う
 
 require "optparse"
